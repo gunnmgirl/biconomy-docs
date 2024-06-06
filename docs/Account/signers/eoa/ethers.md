@@ -14,7 +14,7 @@ This section showcases two ways you can create Smart Accounts using Ethers JS. U
 You will need the following dependencies to create a Smart Account this way:
 
 ```bash
-yarn add @biconomy/account @biconomy/bundler @biconomy/common @biconomy/core-types @biconomy/modules @biconomy/paymaster ethers@5.7.2
+yarn add @biconomy/account ethers
 ```
 
 ### Imports
@@ -28,7 +28,7 @@ import { Wallet, providers, ethers } from "ethers";
 
 ```typescript
 const provider = new providers.JsonRpcProvider(
-  "https://rpc.ankr.com/polygon_mumbai"
+  "https://rpc-amoy.polygon.technology/"
 ); // or any other rpc provider link
 const signer = new Wallet("<your_private_key>" || "", provider);
 // we recommend using environment variables for your private keys!
@@ -52,12 +52,18 @@ createAccount();
 
 ## Using Ethers Signer from Browser EOA
 
+:::tip
+
+Check out an end-to-end integration of Browser EOA with Biconomy on this [example app](https://aaeoa.vercel.app/) and [repo](https://github.com/bcnmy/biconomy_eoa_example)!
+
+:::
+
 ### Dependencies
 
 You will need the following dependencies to create a Smart Account this way:
 
 ```bash
-yarn add @biconomy/account ethers@5.7.2
+yarn add @biconomy/account ethers
 ```
 
 ### Create the Biconomy Smart Account

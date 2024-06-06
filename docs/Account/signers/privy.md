@@ -9,7 +9,7 @@ sidebar_position: 4
 
 :::tip
 
-Check out an end-to-end integration of Privy with Biconomy on this [example app](https://biconomy-example.privy.io/) and [repo](https://github.com/privy-io/biconomy-example)!
+Check out an end-to-end integration of Privy with Biconomy on this [example app](https://aaprivy.vercel.app/) and [repo](https://github.com/bcnmy/biconomy_privy_example)!
 
 :::
 
@@ -21,7 +21,7 @@ In your app's repository, install the `@privy-io/react-auth` SDK from Privy and 
 
 ```bash
 
-yarn add @privy-io/react-auth @biconomy/account @biconomy/bundler @biconomy/common @biconomy/core-types @biconomy/paymaster
+yarn add @privy-io/react-auth @biconomy/account
 
 ```
 
@@ -81,8 +81,8 @@ import {useWallets} from '@privy-io/react-auth';
 const {wallets} = useWallets();
 const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
 // Switch the embedded wallet to your target network
-// Replace '80001' with your desired chain ID.
-await embeddedWallet.switchChain(80001);
+// Replace '80002' with your desired chain ID.
+await embeddedWallet.switchChain(80002);
 
 ```
 
@@ -99,7 +99,7 @@ const smartAccount = await createSmartAccountClient({
   signer: signer as LightSigner,
   bundlerUrl: "", // <-- Read about this at https://docs.biconomy.io/dashboard#bundler-url
   biconomyPaymasterApiKey: "", // <-- Read about at https://docs.biconomy.io/dashboard/paymaster
-  rpcUrl: "" // <-- read about this at https://docs.biconomy.io/Account/methods#createsmartaccountclient
+  rpcUrl: "", // <-- read about this at https://docs.biconomy.io/Account/methods#createsmartaccountclient
 });
 
 const address = await smartAccount.getAccountAddress();

@@ -15,7 +15,9 @@ To obtain an authToken required in the header, you can generate one in your acco
 
 > **_GET Request_**
 
-URL: https://paymaster-dashboard-backend.prod.biconomy.io/api/v2/public/sdk/paymaster
+```
+https://paymaster-dashboard-backend.prod.biconomy.io/api/v2/public/sdk/paymaster
+```
 
 Parameters
 
@@ -36,7 +38,7 @@ Responses
     "data": [
         {
             "name": "setQuote",
-            "chainId": 80001,
+            "chainId": 80002,
             "apiKey": "lU3R_dRgt.22c06266-1faa-4c47-8477-e8eaacd90330"
         },
         {
@@ -61,7 +63,9 @@ Responses
 
 > **_POST Request_**
 
-URL: https://paymaster-dashboard-backend.prod.biconomy.io/api/v2/public/sdk/paymaster
+```
+https://paymaster-dashboard-backend.prod.biconomy.io/api/v2/public/sdk/paymaster
+```
 
 Parameters
 
@@ -87,8 +91,8 @@ Body
     "statusCode": 200,
     "message": "DApp registered successfully",
     "data": {
-        "name": "setQuoteMumbai",
-        "chainId": 80001,
+        "name": "setQuoteAmoy",
+        "chainId": 80002,
         "apiKey": "vrTVKqTZI.7ea9dae1-9a06-4c17-a4fb-7728177b76d3" // apiKey is used to init biconomy instance to relay transactions for this Dapp
     }
 }
@@ -192,7 +196,9 @@ Smart Contract Already Exists
 
 > **_GET Request_**
 
-URL: https://paymaster-dashboard-backend.prod.biconomy.io/api/v2/public/sdk/smart-contract
+```
+https://paymaster-dashboard-backend.prod.biconomy.io/api/v2/public/sdk/smart-contract
+```
 
 Parameters
 
@@ -238,7 +244,9 @@ Header
 
 > **_PATCH Request_**
 
-URL: https://paymaster-dashboard-backend.prod.biconomy.io/api/v2/public/sdk/smart-contract
+```
+https://paymaster-dashboard-backend.prod.biconomy.io/api/v2/public/sdk/smart-contract
+```
 
 Parameters
 
@@ -318,7 +326,9 @@ Usually, this occurs when incorrect apiKey is used or the address is not added
 
 > **_GET Request_**
 
-URL: https://paymaster-dashboard-backend.prod.biconomy.io/api/v2/public/sdk/funding-message/{{paymasterId}}
+```
+https://paymaster-dashboard-backend.prod.biconomy.io/api/v2/public/sdk/funding-message/{{paymasterId}}
+```
 
 Headers
 
@@ -356,7 +366,9 @@ Responses
 
 > **_PATCH Request_**
 
-URL: https://paymaster-dashboard-backend.prod.biconomy.io//api/v2/public/sdk/paymaster
+```
+ https://paymaster-dashboard-backend.prod.biconomy.io//api/v2/public/sdk/paymaster
+```
 
 Parameters
 
@@ -386,7 +398,7 @@ Responses
         "message": "Paymaster updated successfully",
         "data": {
         "name": "testXXX",
-        "chainId": 80001,
+        "chainId": 80002,
         "apiKey": "GwfDKydYq.2967f140-XXXX-4042-XXXX-76684f9XXXX",
         "paymasterId": "e998530d-XXXX-451e-XXXX-cb6fXXXXef54"
     }
@@ -428,7 +440,9 @@ Usually, this occurs when incorrect apiKey or authToken is used
 
 > **_DELETE Request_**
 
-URL: https://paymaster-dashboard-backend.prod.biconomy.io/api/v2/public/sdk/smart-contract
+```
+https://paymaster-dashboard-backend.prod.biconomy.io/api/v2/public/sdk/smart-contract
+```
 
 Parameters
 

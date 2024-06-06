@@ -21,7 +21,7 @@ const smartAccount = await createSmartAccountClient({
   signer,
   bundlerUrl: "", // <-- Read about this at https://docs.biconomy.io/dashboard#bundler-url
   biconomyPaymasterApiKey: "", // <-- Read about at https://docs.biconomy.io/dashboard/paymaster
-  rpcUrl: "" // Recommended for signers that are not a viem wallet or an ethers signer. It's advised to pass RPC url in case of custom signers such as privy, dynamic etc. If rpcUrl is not provided then a default public rpc will be used - which will likely be heavily throttled and can often silently fail
+  rpcUrl: "", // Recommended for signers that are not a viem wallet or an ethers signer. It's advised to pass RPC url in case of custom signers such as privy, dynamic etc. If rpcUrl is not provided then a default public rpc will be used - which will likely be heavily throttled and can often silently fail
 });
 ```
 
@@ -32,12 +32,12 @@ _required params are explicitly mentioned_
 - config (`object`, required): A [BiconomySmartAccountConfig](https://bcnmy.github.io/biconomy-client-sdk/classes/BiconomySmartAccountV2.html#biconomySmartAccountConfig) object containing configuration options for creating the smart account.
   - signer(`Signer`, required) OR defaultValidationModule (`BaseValidationModule`, required): One either needs to pass the signer instance or the default validation module which gets used to detect address of the smart account. If not passed explictly, ECDSA module gets used as default.
   - bundlerUrl (`string`, required) OR bundler (`IBundler`, required) : bundler url which will be internally used to create bundler instance or the bundler instance. Bundler instance can also be used if one wants to customise the bundler. Refer to bundler [integration](/Bundler/integration) for more details on bundler.
-  - chainId (`ChainId` enum): The identifier for the blockchain network. (e.g., ChainId.POLYGON_MUMBAI).
+  - chainId (`ChainId` enum): The identifier for the blockchain network. (e.g., ChainId.POLYGON_AMOY).
   - biconomyPaymasterApiKey(`string`) OR paymaster (`IPaymaster`): one can either pass paymaster API key or custom paymaster instance to use the paymaster.
   - entryPointAddress (`string`): DEFAULT_ENTRY_POINT_ADDRESS will be used if not passed, otherwise the passed address will be used. On specific chains like Chiliz Mainnet it is a different address, so will need to be passed explicitly. Refer to below notes on this.
   - activeValidationModule (`BaseValidationModule`): The run-time validation module (must be one of enabled validation modules) to sign and validate next userOp.
   - rpcUrl (`string`): Recommended for signers that are not a viem wallet or an ethers signer. It's advised to pass RPC url in case of custom signers such as privy, dynamic etc. If rpcUrl is not provided then a default public rpc will be used - which will likely be heavily throttled and can often silently fail.
-  - index (`number`): index to create multiple smart accounts for an EOA. First account gets created with 0 index. 
+  - index (`number`): index to create multiple smart accounts for an EOA. First account gets created with 0 index.
   - accountAddress(`string`): smart account address. If you already have the smart account address, you can pass using this to get the instance.
 
 **Returns**
@@ -48,18 +48,20 @@ _required params are explicitly mentioned_
 Building on Chiliz Mainnet or the Spicy Testnet? Note that the entry point address on this is different as it was deployed by us on the Biconomy team. The address of the entry point is : [0x00000061FEfce24A79343c27127435286BB7A4E1](https://scan.chiliz.com/address/0x00000061FEfce24A79343c27127435286BB7A4E1/contracts#address-tabs)
 :::
 
-
 ### [createBundler](https://bcnmy.github.io/biconomy-client-sdk/functions/createBundler.html)
+
 This method creates a custom bundler instance.
 
 **Usage**
+
 ```jsx
 const address = await createBundler({
-  bundlerUrl: "BUNDLER_URL"
+  bundlerUrl: "BUNDLER_URL",
 });
 ```
 
 **Params**
+
 - config(`BundlerConfig`): configs to be passed to bundler
 
 ```jsx
@@ -81,7 +83,9 @@ export type Bundlerconfig = {
     };
 };
 ```
+
 **Returns**
+
 - bundler(`Promise<Bundler>`): bundler instance
 
 ## Smart Account Get Methods
@@ -136,12 +140,200 @@ const index = smartAccount.index;
 
 - index (`number`): A number indicating the index of current active smart account.
 
-
 ### [deploy()](https://bcnmy.github.io/biconomy-client-sdk/classes/BiconomySmartAccountV2.html#deploy)
+
+This method will deploy a Smart Account contract. It is useful for deploying in a moment when you know that gas prices are low,
+and you want to deploy the account before sending the first user operation. This step can otherwise be skipped, as the deployment will alternatively be bundled with the first user operation.
+
+**Usage**
+
+```jsx
+// If you want to use a paymaster...
+const { wait } = await smartAccount.deploy({
+  paymasterServiceData: { mode: PaymasterMode.SPONSORED },
+});
+
+// Or if you can't use a paymaster send native token to this address:
+const counterfactualAddress = await smartAccount.getAccountAddress();
+
+// Then deploy the account
+const { wait } = await smartAccount.deploy();
+const { success, receipt } = await wait();
+```
+
+**Parameters**
+
+- buildUseropDto(`BuildUserOpOptions`): optional buildUserOpOptions.
+
+**Returns**
+
+- userOpResponse (`Promise<UserOpResponse>`): The method returns an object of type `UserOpResponse` which has a `userOpHash` and helper methods: `wait()` and `waitForTxHash()`.
 
 ### [getBalances()](https://bcnmy.github.io/biconomy-client-sdk/classes/BiconomySmartAccountV2.html#getBalances)
 
+This method will fetch the token balances of the smartAccount instance. The balance of the native token will always be returned as the last element in the reponse array, with the address set to 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.
+
+**Usage**
+
+```jsx
+const token = "0x747A4168DB14F57871fa8cda8B5455D8C2a8e90a";
+const smartAccount = await createSmartAccountClient({
+  signer,
+  bundlerUrl,
+  paymasterUrl,
+});
+const [tokenBalanceFromSmartAccount, nativeTokenBalanceFromSmartAccount] =
+  await smartAccount.getBalances([token]);
+
+console.log(tokenBalanceFromSmartAccount);
+// {
+//   amount: 1000000000000000n,
+//   decimals: 6,
+//   address: "0x747A4168DB14F57871fa8cda8B5455D8C2a8e90a",
+//   formattedAmount: "1000000",
+//   chainId: 80002
+// }
+```
+
+**Parameters**
+
+- addresses(Optional). Array of asset addresses to fetch the balances of. If not provided, the method will return only the balance of the native token.
+
+**Returns**
+
+- A promise with an array of token balances plus the native token balance of the smartAccount instance
+
+```jsx
+export interface BalancePayload {
+  /** address: The address of the account */
+  address: string
+  /** chainId: The chainId of the network */
+  chainId: number
+  /** amount: The amount of the balance */
+  amount: bigint
+  /** decimals: The number of decimals */
+  decimals: number
+  /** formattedAmount: The amount of the balance formatted */
+  formattedAmount: string
+}
+```
+
 ### [getSupportedTokens()](https://bcnmy.github.io/biconomy-client-sdk/classes/BiconomySmartAccountV2.html#getSupportedTokens)
+
+This function will return an array of supported tokens from the erc20 paymaster associated with the Smart Account
+
+**Usage**
+
+```jsx
+const smartAccount = await createSmartAccountClient({
+  signer,
+  bundlerUrl,
+  paymasterUrl,
+}); // Retrieve bundler/paymaster url from dashboard
+
+const tokens = await smartAccount.getSupportedTokens();
+// [
+//   {
+//     symbol: "USDC",
+//     tokenAddress: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+//     decimal: 6,
+//     logoUrl: "https://assets.coingecko.com/coins/images/279/large/usd-coin.png?1595353707",
+//     premiumPercentage: 0.1,
+//   }, ...
+// ]
+```
+
+**Returns**
+
+- A promise with an array of erc20 tokens enabled by the paymaster
+
+```jsx
+type SupportedToken = {
+  symbol: string,
+  tokenAddress: string,
+  decimal: number,
+  logoUrl?: string | undefined,
+  premiumPercentage: number,
+};
+```
+
+### [getGasEstimates()](https://bcnmy.github.io/biconomy-client-sdk/classes/BiconomySmartAccountV2.html#getGasEstimates)
+
+Get a gas estimate in wei for given tx(s)
+
+**Usage**
+
+```jsx
+const smartAccount = await createSmartAccountClient({
+  signer,
+  bundlerUrl,
+  paymasterUrl,
+}); // Retrieve bundler/paymaster url from dashboard
+
+const encodedCall = encodeFunctionData({
+  abi: parseAbi(["function safeMint(address to) public"]),
+  functionName: "safeMint",
+  args: ["0x..."],
+});
+
+const tx = {
+  to: nftAddress,
+  data: encodedCall,
+};
+const amountInWei = await smartAccount.getGasEstimates([tx, tx], {
+  paymasterServiceData: {
+    mode: PaymasterMode.SPONSORED,
+  },
+});
+console.log(amountInWei.toString());
+```
+
+**Returns**
+
+- A promise with the estimated gas cost in wei
+
+### [withdraw()](https://bcnmy.github.io/biconomy-client-sdk/classes/BiconomySmartAccountV2.html#withdraw)
+
+This function will transfers funds from Smart Account to `recipient` (usually EOA)
+
+**Usage**
+
+```jsx
+const token = "0x747A4168DB14F57871fa8cda8B5455D8C2a8e90a";
+const signer = createWalletClient({
+  account,
+  chain: polygonMumbai,
+  transport: http(),
+});
+
+const smartAccount = await createSmartAccountClient({
+  signer,
+  bundlerUrl,
+  biconomyPaymasterApiKey,
+});
+
+const { wait } = await smartAccount.withdraw(
+  [
+    { address: token }, // omit the amount to withdraw the full balance
+    { address: NATIVE_TOKEN_ALIAS, amount: BigInt(1) },
+  ],
+  '0xrecipient', // Default recipient used if no recipient is present in the withdrawal request
+  {
+    paymasterServiceData: { mode: PaymasterMode.SPONSORED },
+  }
+);
+
+// OR to withdraw all of the native token, leaving no dust in the smart account
+const { wait } = await smartAccount.withdraw([], '0xrecipient', {
+  paymasterServiceData: { mode: PaymasterMode.SPONSORED },
+});
+
+const { success } = await wait();
+```
+
+**Returns**
+
+- userOpResponse (`Promise<UserOpResponse>`): The method returns an object of type `UserOpResponse` which has a `userOpHash` and helper methods: `wait()` and `waitForTxHash()`.
 
 ## Transaction Methods
 
@@ -155,11 +347,11 @@ This method is used to Send a transaction to a bundler for execution. It interna
 import { createClient } from "viem";
 import { createSmartAccountClient, PaymasterMode } from "@biconomy/account";
 import { createWalletClient, http } from "viem";
-import { polygonMumbai } from "viem/chains";
+import { polygonAmoy } from "viem/chains";
 
 const signer = createWalletClient({
   account,
-  chain: polygonMumbai,
+  chain: polygonAmoy,
   transport: http(),
 });
 
@@ -215,13 +407,13 @@ const { transactionHash, userOperationReceipt } = await waitForTxHash();
        nonceOverride?: number;
      };
      // nonceOptions usage
-     let i = 0;
+     let i = 1;
      const userOp = await smartAccount.buildUserOp([tx1], {
        nonceOptions: { nonceKey: i++ },
      });
      ```
 
-     nonceKey can be initialised at any arbitrary number and incremented as one builds user operations to be sent in parallel. The nonceKey will create a batch or space in which the nonce can safely increment without colliding with other transactions. The nonceOverride will directly override the nonce and should only be used if you know the order in which you are sending the userOps.
+     nonceKey can be initialised at any arbitrary number which is not 0 and incremented as one builds user operations to be sent in parallel. The nonceKey will create a batch or space in which the nonce can safely increment without colliding with other transactions. The nonceOverride will directly override the nonce and should only be used if you know the order in which you are sending the userOps.
 
   3. params (`ModuleInfo`): This param can be used to pass session validation module parameters. Refer to the tutorial to learn more about the session keys.
 
@@ -248,17 +440,16 @@ const { transactionHash, userOperationReceipt } = await waitForTxHash();
      };
      ```
 
-  5. simulationType(`SimulationType`, enum): The simulationType flag can be of 2 ways:
-      - `validation` which will only simulate the validation phase, checks if user op is valid but does not check if execution will succeed. By default this flag is set to validation.
-      - `validation_and_execution` checks if user op is valid and if user op execution will succeed.
-    
+  5. simulationType(`SimulationType`, enum): When you send a transaction, bundler performs simulations to check for any reverts. simulationType determines how and when the UserOperation is simulated. This parameter can be set in two ways:
+
+     - `validation` which will only simulate the validation phase, checks if user op is valid but does not check if execution will succeed. By default this flag is set to validation.
+     - `validation_and_execution` checks if user op is valid and if user op execution will succeed based on the callData. It can be useful during development for error logging purposes in case of any issues, but it may lead to increased latency.
 
   6. stateOverrideSet(`StateOverrideSet`): for overriding the blockchain state during simulations or gas estimation.
 
-
 **Returns**
 
-- userOpResponse (`Promise<UserOpResponse>`): The method returns an object of type `UserOpResponse` which has a `userOpHash` and two methods: `wait()` and `waitForTxHash()`.
+- userOpResponse (`Promise<UserOpResponse>`): The method returns an object of type `UserOpResponse` which has a `userOpHash` and helper methods: `wait()` and `waitForTxHash()`.
 
   ```ts
   type UserOpResponse = {
@@ -267,8 +458,8 @@ const { transactionHash, userOperationReceipt } = await waitForTxHash();
     waitForTxHash(): Promise<UserOpStatus>;
   };
 
-   type UserOpReceipt = {
-  /* The request hash of the UserOperation. */
+  type UserOpReceipt = {
+    /* The request hash of the UserOperation. */
     userOpHash: string;
     /* The entry point address used for the UserOperation. */
     entryPoint: string;
@@ -290,18 +481,20 @@ const { transactionHash, userOperationReceipt } = await waitForTxHash();
   ```
 
   The `wait()` method resolves when the user operation is dispatched by the bundler on-chain and gets mined. The `waitForTxHash()` method returns a `UserOpStatus` object which includes the transaction hash and the receipt once added on-chain.
-  ```ts
-    const { transactionHash } = await userOpResponse.waitForTxHash();
-    console.log("transaction Hash", transactionHash);
 
-    const userOpReceipt  = await userOpResponse.wait();
-    
-    if(userOpReceipt.success == 'true') { // indicates that the user operation was successful without any revert
-      console.log("UserOp receipt", userOpReceipt)
-      console.log("actual transaction receipt", userOpReceipt.receipt)
-    }
-  
+  ```ts
+  const { transactionHash } = await userOpResponse.waitForTxHash();
+  console.log("transaction Hash", transactionHash);
+
+  const userOpReceipt = await userOpResponse.wait();
+
+  if (userOpReceipt.success == "true") {
+    // indicates that the user operation was successful without any revert
+    console.log("UserOp receipt", userOpReceipt);
+    console.log("actual transaction receipt", userOpReceipt.receipt);
+  }
   ```
+
 ### buildUserOp( )
 
 This method is used for configuring and setting up properties of the partial `userOp` object. It converts an individual transaction or batch of transactions into a partial user operation populating fields such as initCode, sender, nonce, maxFeePerGas, maxPriorityFeePerGas, callGasLimit, verificationGasLimit and preVerificationGas (as this step also involves estimating gas for the userOp internally)
@@ -373,7 +566,7 @@ Please note that `simulationType` allows for more debugging insights about `call
 
 **Returns**
 
-- userOpsResponse (`UserOpResponse`): The method returns an object of type `UserOpResponse` which has a `userOpHash` and two methods: `wait()` and `waitForTxHash()`.
+- userOpsResponse (`UserOpResponse`): The method returns an object of type `UserOpResponse` which has a `userOpHash` and helper methods: `wait()` and `waitForTxHash()`.
 
   ```ts
   type UserOpResponse = {
@@ -421,5 +614,5 @@ Please ensure that the user operations have been correctly signed before using t
 
 **Returns**
 
-- userOpsResponse (`UserOpResponse`): The method returns an object of type `UserOpResponse` which has a `userOpHash` and two methods: `wait()` and `waitForTxHash()`.
+- userOpsResponse (`UserOpResponse`): The method returns an object of type `UserOpResponse` which has a `userOpHash` and helper methods: `wait()` and `waitForTxHash()`.
   The `wait()` method resolves when the user operation is dispatched by the bundler on-chain and gets mined. The `waitForTxHash()` method returns a `UserOpStatus` object which includes the transaction hash and the receipt once added on-chain.

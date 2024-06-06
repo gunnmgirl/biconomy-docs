@@ -21,7 +21,7 @@ let signer = new ethers.Wallet("private key", provider);
 
 const smartAccount = await BiconomySmartAccountV2.create({
   signer: signer,
-  chainId: ChainId.POLYGON_MUMBAI, // Specify the desired chain (e.g., Polygon Mumbai)
+  chainId: 80002, // Specify the desired chain (e.g., Polygon Amoy)
   bundlerUrl: "", // <-- Read about this at https://docs.biconomy.io/dashboard#bundler-url
   biconomyPaymasterApiKey: "", // <-- Read about at https://docs.biconomy.io/dashboard/paymaster
 });
@@ -33,7 +33,7 @@ _required params are explicitly mentioned_
 
 - config (`object`, required): A `BiconomySmartAccountV2Config` object containing configuration options for creating the smart account.
   - signer(`Signer`, required) OR defaultValidationModule (`BaseValidationModule`, required): One either needs to pass the signer instance or the default validation module which gets used to detect address of the smart account. If not passed explictly, ECDSA module gets used as default.
-  - chainId (`ChainId` enum, required): The identifier for the blockchain network. (e.g., ChainId.POLYGON_MUMBAI).
+  - chainId (`ChainId` enum, required): The identifier for the blockchain network. (e.g., 80002).
   - bundlerUrl (`string`, required) OR bundler (`IBundler`, required) : bundler url which will be internally used to create bundler instance or the bundler instance. Bundler instance can also be used if one wants to customise the bundler. Refer to bundler [integration](/Bundler/integration) for more details on bundler.
   - biconomyPaymasterApiKey(`string`) OR paymaster (`IPaymaster`): one can either pass paymaster API key or custom paymaster instance to use the paymaster.
   - entryPointAddress (`string`): DEFAULT_ENTRY_POINT_ADDRESS will be used if not passed, otherwise the passed address will be used. On specific chains like Chiliz Mainnet it is a different address, so will need to be passed explicitly. Refer to below notes on this.
@@ -216,13 +216,13 @@ const userOp = await smartAccount.buildUserOp([tx1]);
        nonceOverride?: number;
      };
      // nonceOptions usage
-     let i = 0;
+     let i = 1;
      const userOp = await smartAccount.buildUserOp([tx1], {
        nonceOptions: { nonceKey: i++ },
      });
      ```
 
-     nonceKey can be initialised at any arbitrary number and incremented as one builds user operations to be sent in parallel. The nonceKey will create a batch or space in which the nonce can safely increment without colliding with other transactions. The nonceOverride will directly override the nonce and should only be used if you know the order in which you are sending the userOps.
+     nonceKey can be initialised at any arbitrary number which is not 0 and incremented as one builds user operations to be sent in parallel. The nonceKey will create a batch or space in which the nonce can safely increment without colliding with other transactions. The nonceOverride will directly override the nonce and should only be used if you know the order in which you are sending the userOps.
 
   5. forceEncodeForBatch (`boolean`): When transactions array is passed, by default Biconomy sdk encodes it for executeBatch() executor function and execute() function for single transaction. However, in some cases, there may be a preference to encode a single transaction for a batch, especially if the custom module only decodes for executeBatch. In such cases, set this flag to true; otherwise, it remains false by default.
 

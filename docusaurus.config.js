@@ -60,11 +60,6 @@ const config = {
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
         },
-        blog: {
-          blogSidebarTitle: "All posts",
-          blogSidebarCount: "ALL",
-          postsPerPage: "ALL",
-        },
       }),
     ],
   ],
@@ -114,7 +109,7 @@ const config = {
             position: "left",
             label: "Docs",
           },
-          { to: "blog", label: "Blog", position: "left" },
+          { to: "https://www.biconomy.io/blog", label: "Blog", position: "left" },
           {
             to: "/partners",
             position: "left",
@@ -134,6 +129,7 @@ const config = {
           {
             type: "docsVersionDropdown",
           },
+          { to: "https://github.com/orgs/bcnmy/discussions/categories/q-a", label: "Discussions", position: "left" },
         ],
       },
       footer: {
@@ -164,8 +160,8 @@ const config = {
             title: "Community",
             items: [
               {
-                label: "Forums",
-                href: "https://forum.biconomy.io/",
+                label: "Github Discussion",
+                href: "https://github.com/orgs/bcnmy/discussions/categories/q-a",
               },
               {
                 label: "Discord",

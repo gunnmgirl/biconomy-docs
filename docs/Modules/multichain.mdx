@@ -1,6 +1,6 @@
 ---
 sidebar_label: "Multichain Validation"
-sidebar_position: 3
+sidebar_position: 2
 description: "Overview of Multichain Validation Module with ECDSA Ownership"
 ---
 
@@ -102,7 +102,7 @@ Integrate the Multichain Validation Module into Biconomy Smart Accounts using th
 
 ```bash
 
-npm install @biconomy/modules ethers
+npm install @biconomy/account ethers
 
 ```
 
@@ -111,7 +111,7 @@ npm install @biconomy/modules ethers
 
 ```bash
 
-yarn add @biconomy/modules ethers
+yarn add @biconomy/account ethers
 
 ```
 
@@ -120,7 +120,7 @@ yarn add @biconomy/modules ethers
 
 ```bash
 
-pnpm add @biconomy/modules ethers
+pnpm add @biconomy/account ethers
 
 ```
 
@@ -142,7 +142,7 @@ const signer = new ethers.Wallet("[Private_Key]", provider);
 import {
   createMultiChainValidationModule,
   DEFAULT_MULTICHAIN_MODULE,
-} from "@biconomy/modules";
+} from "@biconomy/account";
 
 // Notice this is chain agnostic so same instance can be used on instances of Smart account API on different chains
 const multiChainModule = await createMultiChainValidationModule({
@@ -220,8 +220,8 @@ let partialUserOp2 = await polygonAccount.buildUserOp([transaction], {
 
 // Use multichain module to sign once for all ops
 const returnedOps = await multiChainModule.signUserOps([
-  { userOp: partialUserOp1, chainId: ChainId.BASE_GOERLI_TESTNET },
-  { userOp: partialUserOp2, chainId: ChainId.POLYGON_MUMBAI },
+  { userOp: partialUserOp1, chainId: 84531 },
+  { userOp: partialUserOp2, chainId: 80002 },
 ]);
 
 const userOpResponse1 = await baseAccount.sendSignedUserOp(
